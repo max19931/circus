@@ -37,7 +37,8 @@ def watcher_defaults():
         'copy_path': False,
         'hooks': dict(),
         'respawn': True,
-        'autostart': True}
+        'autostart': True,
+        'dependencies': []}
 
 
 _BOOL_STATES = {'1': True, 'yes': True, 'true': True, 'on': True,
@@ -287,6 +288,9 @@ def get_config(config_file):
                     watcher['close_child_stderr'] = dget(section,
                                                          "close_child_stderr",
                                                          False, bool)
+                elif opt == 'dependencies':
+                    val = dget(section, "dependencies", "", str)
+                    watcher['dependencies'] = val.split() if val else []
                 else:
                     # freeform
                     watcher[opt] = val
