@@ -82,6 +82,10 @@ def convert_option(key, val):
         return val
     elif key.startswith('rlimit_'):
         return int(val)
+    elif key == "priority":
+        return int(val)
+    elif key == "dependencies":
+        return val.split() if val else []
 
     raise ArgumentError("unknown key %r" % key)
 
@@ -92,7 +96,9 @@ def validate_option(key, val):
                   'shell', 'env', 'cmd', 'args', 'copy_env', 'retry_in',
                   'max_retry', 'graceful_timeout', 'stdout_stream',
                   'stderr_stream', 'max_age', 'max_age_variance', 'respawn',
-                  'singleton', 'hooks')
+                  'hooks', 'singleton', 'rlimits', 'copy_path', 'args',
+                  'use_sockets', 'executable', 'priority', 'autostart',
+                  'dependencies')
 
     valid_prefixes = ('stdout_stream.', 'stderr_stream.', 'hooks.', 'rlimit_')
 

@@ -192,7 +192,7 @@ class Watcher(object):
                  max_age_variance=30, hooks=None, respawn=True,
                  autostart=True, on_demand=False, virtualenv=None,
                  close_child_stdout=False, close_child_stderr=False,
-                 **options):
+                 dependencies=None, **options):
         self.name = name
         self.use_sockets = use_sockets
         self.on_demand = on_demand
@@ -227,6 +227,9 @@ class Watcher(object):
         self.autostart = autostart
         self.close_child_stdout = close_child_stdout
         self.close_child_stderr = close_child_stderr
+        if dependencies is None:
+            dependencies = []
+        self.dependencies = dependencies
         self.loop = loop or ioloop.IOLoop.instance()
 
         if singleton and self.numprocesses not in (0, 1):
