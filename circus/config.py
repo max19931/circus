@@ -39,7 +39,8 @@ def watcher_defaults():
         'copy_path': False,
         'hooks': dict(),
         'respawn': True,
-        'autostart': True}
+        'autostart': True,
+        'dependencies': []}
 
 
 class DefaultConfigParser(StrictConfigParser):
@@ -237,9 +238,23 @@ def get_config(config_file):
                         val[1] = to_bool(val[1])
 
                     watcher['hooks'][hook_name] = val
+
                 # default bool to True
                 elif opt in ('check_flapping', 'respawn', 'autostart'):
                     watcher[opt] = dget(section, opt, True, bool)
+
+                elif opt == 'close_child_stdout':
+                    watcher['close_child_stdout'] = dget(section,
+                                                         "close_child_stdout",
+                                                         False, bool)
+                elif opt == 'close_child_stderr':
+                    watcher['close_child_stderr'] = dget(section,
+                                                         "close_child_stderr",
+                                                         False, bool)
+                elif opt == 'dependencies':
+                    val = dget(section, "dependencies", "", str)
+                    watcher['dependencies'] = val.split() if val else []
+
                 else:
                     # freeform
                     watcher[opt] = val
