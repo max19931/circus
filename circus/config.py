@@ -40,7 +40,8 @@ def watcher_defaults():
         'hooks': dict(),
         'respawn': True,
         'autostart': True,
-        'dependencies': []}
+        'dependencies': [],
+        'upgradable': False}
 
 
 class DefaultConfigParser(StrictConfigParser):
@@ -244,6 +245,9 @@ def get_config(config_file):
                 elif opt == 'dependencies':
                     val = dget(section, "dependencies", "", str)
                     watcher['dependencies'] = val.split() if val else []
+                elif opt == 'upgradable':
+                    watcher['upgradable'] = dget(section, "upgradable", False,
+                                                 bool)
                 else:
                     # freeform
                     watcher[opt] = val
