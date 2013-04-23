@@ -6,6 +6,7 @@ from circus.commands import (   # NOQA
     globaloptions,
     incrproc,
     ipythonshell,
+    upgrade,
     list,
     listen,
     listsockets,
