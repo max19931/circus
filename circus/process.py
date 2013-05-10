@@ -533,6 +533,16 @@ class Process(object):
         return OTHER
 
     @property
+    def status_name(self):
+        status_map = {
+            RUNNING: 'RUNNING',
+            DEAD_OR_ZOMBIE: 'DEAD OR ZOMBIE',
+            UNEXISTING: 'UNEXISTING',
+            OTHER: 'OTHER',
+        }
+        return status_map[self.status]
+
+    @property
     def pid(self):
         """Return the *pid*"""
         return self._worker.pid
