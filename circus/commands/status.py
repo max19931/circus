@@ -73,8 +73,42 @@ class Status(Command):
         if "statuses" in msg:
             statuses = msg.get("statuses")
             watchers = sorted(statuses)
-            return "\n".join(["%s: %s" % (watcher, statuses[watcher])
-                              for watcher in watchers])
+            watcher_format = '{name}: {status}'
+            formatted = []
+            for watcher in watchers:
+                watcher_status, processes = self._format_status(
+                    statuses[watcher]
+                )
+                if watcher_status == 'stopped':
+                    s = watcher_status
+                else:
+                    s = '{}\n{}'.format(watcher_status, processes)
+
+                formatted.append(watcher_format.format(
+                    name=watcher,
+                    status=s,
+                ))
+
+            return '\n'.join(formatted)
         elif "status" in msg and "status" != "error":
-            return msg.get("status")
+            status = msg.get('status')
+            watcher_status, processes = self._format_status(status)
+            if watcher_status == 'stopped':
+                return watcher_status
+            else:
+                return '{status}:\n{processes}'.format(
+                    status=watcher_status,
+                    processes=processes,
+                )
+
         return self.console_error(msg)
+
+    def _format_status(self, status_dict):
+        watcher_status = status_dict['watcher']
+        process_dicts = status_dict['processes']
+        process_format = '\tpid: {pid} {status} uptime: {uptime}'
+        process_statuses = '\n'.join(
+            process_format.format(**process)
+            for process in process_dicts
+        )
+        return watcher_status, process_statuses
