@@ -129,8 +129,8 @@ def get_info(process=None, interval=0, with_childs=False):
     info = {}
     try:
         mem_info = process.get_memory_info()
-        info['mem_info1'] = bytes2human(mem_info[0])
-        info['mem_info2'] = bytes2human(mem_info[1])
+        info['mem_info1'] = mem_info[0]
+        info['mem_info2'] = mem_info[1]
     except AccessDenied:
         info['mem_info1'] = info['mem_info2'] = "N/A"
 
