@@ -53,6 +53,8 @@ class Upgrade(Command):
         if watcher.upgradable is False:
             return {"numprocesses": watcher.numprocesses, "upgradable": False}
         else:
+            if watcher.stopped is True:
+                return {'stopped': True}
             if watcher.numprocesses != 1:
                 return {"numprocesses": watcher.numprocesses,
                         "toomanyprocesses": True}
@@ -62,6 +64,8 @@ class Upgrade(Command):
         if msg.get("status") == "ok":
             if msg.get('upgradable') is False:
                 return 'This watcher is not upgradable'
+            elif msg.get('stopped') is True:
+                return 'Upgrade failed: watcher is stopped'
             elif msg.get("toomanyprocesses") is True:
                 return ('Upgrade failed: there are too many '
                         'processes running for this watcher')
