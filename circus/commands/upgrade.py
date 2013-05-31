@@ -17,8 +17,7 @@ class Upgrade(Command):
             {
                 "command": "incr",
                 "properties": {
-                    "name": "<watchername>",
-                    "nb": <nbprocess>
+                    "name": "<watchername>"
                 }
             }
 
@@ -32,13 +31,12 @@ class Upgrade(Command):
 
         ::
 
-            $ circusctl incr <name> [<nbprocess>]
+            $ circusctl upgrade <name>
 
         Options
         +++++++
 
         - <name>: name of the watcher.
-        - <nbprocess>: the number of processes to add.
 
     """
 
@@ -55,13 +53,18 @@ class Upgrade(Command):
         if watcher.upgradable is False:
             return {"numprocesses": watcher.numprocesses, "upgradable": False}
         else:
-            nb = props.get("nb", 1)
-            return {"numprocesses": watcher.incr(nb)}
+            if watcher.numprocesses != 1:
+                return {"numprocesses": watcher.numprocesses,
+                        "toomanyprocesses": True}
+            return {"numprocesses": watcher.incr(1)}
 
     def console_msg(self, msg):
         if msg.get("status") == "ok":
             if msg.get('upgradable') is False:
                 return 'This watcher is not upgradable'
+            elif msg.get("toomanyprocesses") is True:
+                return ('Upgrade failed: there are too many '
+                        'processes running for this watcher')
             else:
                 return 'Upgrade successful'
         return self.console_error(msg)
