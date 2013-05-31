@@ -48,21 +48,20 @@ class Upgrade(Command):
     def message(self, *args, **opts):
         if len(args) < 1:
             raise ArgumentError("number of arguments invalid")
-        return self.make_message(name=args[0], command="incr")
+        return self.make_message(name=args[0], command="upgrade")
 
     def execute(self, arbiter, props):
         watcher = self._get_watcher(arbiter, props.get('name'))
-        if watcher.singleton:
-            return {"numprocesses": watcher.numprocesses, "singleton": True}
+        if watcher.upgradable is False:
+            return {"numprocesses": watcher.numprocesses, "upgradable": False}
         else:
             nb = props.get("nb", 1)
             return {"numprocesses": watcher.incr(nb)}
 
     def console_msg(self, msg):
         if msg.get("status") == "ok":
-            if "singleton" in msg:
-                return ('This watcher is a Singleton - not raising the number '
-                        ' of processes')
+            if msg.get('upgradable') is False:
+                return 'This watcher is not upgradable'
             else:
                 return 'Upgrade successful'
         return self.console_error(msg)
