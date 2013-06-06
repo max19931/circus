@@ -30,6 +30,18 @@ def convert_option(key, val):
         return util.to_bool(val)
     elif key == "copy_env":
         return util.to_bool(val)
+    elif key == "copy_path":
+        return util.to_bool(val)
+    elif key == "singleton":
+        return util.to_bool(val)
+    elif key == "use_sockets":
+        return util.to_bool(val)
+    elif key == "autostart":
+        return util.to_bool(val)
+    elif key == "respawn":
+        return util.to_bool(val)
+    elif key == "upgradable":
+        return util.to_bool(val)
     elif key == "env":
         return util.parse_env_dict(val)
     elif key == "cmd":
@@ -91,7 +103,7 @@ def validate_option(key, val):
                   'stderr_stream', 'max_age', 'max_age_variance', 'respawn',
                   'hooks', 'singleton', 'rlimits', 'copy_path', 'args',
                   'use_sockets', 'executable', 'priority', 'autostart',
-                  'dependencies')
+                  'dependencies',  'upgradable')
 
     valid_prefixes = ('stdout_stream', 'stderr_stream', 'hooks')
 
