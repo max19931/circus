@@ -92,6 +92,8 @@ class Status(Command):
             return '\n'.join(formatted)
         elif "status" in msg and "status" != "error":
             status = msg.get('status')
+            if not isinstance(status, dict):
+                return self.console_error(msg)
             watcher_status, processes = self._format_status(status)
             if watcher_status == 'stopped':
                 return watcher_status
