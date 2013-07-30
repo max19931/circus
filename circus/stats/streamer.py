@@ -122,7 +122,8 @@ class StatsStreamer(object):
             sock = socket.fromfd(fd, socket.AF_INET, socket.SOCK_STREAM)
             self.sockets.append((sock, address, fd))
 
-        self._add_callback('sockets', kind='socket')
+        # disable due to limitation in # of sockets select call handle
+        #self._add_callback('sockets', kind='socket')
 
     def stop_watcher(self, watcher):
         for pid in self._pids[watcher]:
