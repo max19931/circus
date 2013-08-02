@@ -28,6 +28,7 @@ class RedirectorHandler(object):
                 self.redirector.redirect(datamap)
         except IOError as ex:
             if ex.args[0] != errno.EAGAIN:
+                self.redirector.remove_redirection(self.pipe)
                 raise
             try:
                 sys.exc_clear()
