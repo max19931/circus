@@ -697,7 +697,10 @@ class Watcher(object):
                 key=operator.itemgetter(0)):
             status = process.status_name
             info = process.info()
-            age = datetime.timedelta(seconds=info['age'])
+            if info == 'No such process (stopped?)':
+                age = 'N/A'
+            else:
+                age = datetime.timedelta(seconds=info['age'])
             datum = {
                 'pid': pid,
                 'status': status,
