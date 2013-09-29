@@ -107,7 +107,7 @@ class TestWithHook(TestCircus):
             # and we should get back on our feet
             del arbiter.watchers[0].hooks['before_stop']
 
-            while arbiter.watchers[0].status() != 'stopped':
+            while arbiter.watchers[0].status()['processes'][0]['status'] != 'UNEXISTING':
                 time.sleep(.1)
 
             resp = self.cli.call(make_message("numwatchers"))

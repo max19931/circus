@@ -374,7 +374,7 @@ class TestWatcherHooks(TestCircus):
     @tornado.gen.coroutine
     def get_status(self):
         resp = yield self.call("status", name="test")
-        raise tornado.gen.Return(resp['status'])
+        raise tornado.gen.Return(resp['status']['watcher'])
 
     def test_missing_hook(self):
         hooks = {'before_start': ('fake.hook.path', False)}

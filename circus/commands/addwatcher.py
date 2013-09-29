@@ -57,8 +57,25 @@ class AddWatcher(Command):
     properties = ['name', 'cmd']
 
     def message(self, *args, **opts):
-        if len(args) < 2:
-            raise ArgumentError("Invalid number of arguments")
+        options = {}
+        if len(args) == 1 and opts.get('config'):
+            config = get_config(opts.get('config'))
+            try:
+                options = next(
+                    w for w in config['watchers'] if w['name'] == args[0]
+                )
+            except StopIteration:
+                raise ArgumentError(
+                    'Watcher "{0}" not present in config'.format(args[0]))
+            if 'env' in options:
+                options['env'] = parse_env_dict(options['env'])
+            return self.make_message(name=options.pop('name'),
+                         cmd=options.pop('cmd'),
+                         start=opts.get('start', False),
+                         options=options)
+
+        elif len(args) < 2:
+            raise ArgumentError("number of arguments invalid")
 
         return self.make_message(name=args[0], cmd=" ".join(args[1:]),
                                  start=opts.get('start', False))

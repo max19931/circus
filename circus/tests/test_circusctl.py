@@ -122,7 +122,7 @@ class CommandlineTest(TestCircus):
                                              endpoint=ep)
         if stderr:
             self.assertIn('UserWarning', stderr)
-        self.assertEqual(stdout.strip(), 'active')
+        self.assertEqual(stdout.split(':')[0], 'active')
         yield self.stop_arbiter()
 
 
@@ -149,7 +149,7 @@ class CLITest(TestCircus):
         output = stdout.splitlines()
         self.assertEqual(output[0], VERSION)
         # strip of term escape characters, if any
-        prompt = output[2][-len(CircusCtl.prompt):]
+        prompt = output[3][-len(CircusCtl.prompt):]
         self.assertEqual(prompt, CircusCtl.prompt)
 
         yield self.stop_arbiter()
@@ -159,6 +159,6 @@ class CLITest(TestCircus):
         self.assertEqual(stderr, '')
         prompt = stdout.splitlines()
         # first two lines are VERSION and prompt, followed by a blank line
-        self.assertEqual(prompt[3], "Documented commands (type help <topic>):")
+        self.assertEqual(prompt[4], "Documented commands (type help <topic>):")
 
 test_suite = EasyTestSuite(__name__)
