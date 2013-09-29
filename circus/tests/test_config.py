@@ -193,7 +193,7 @@ class TestConfig(TestCase):
 
     def test_plugin_priority(self):
         arbiter = Arbiter.load_from_config(_CONF['issue680'])
-        watchers = arbiter.iter_watchers()
+        watchers = list(arbiter.iter_watchers())
         self.assertEqual(watchers[0].priority, 30)
         self.assertEqual(watchers[0].name, 'plugin:myplugin')
         self.assertEqual(watchers[1].priority, 20)

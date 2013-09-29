@@ -157,10 +157,10 @@ class SignalCommandTest(TestCircus):
         stopped = False
         while time.time() < timeout:
             res = yield client.send_message('status', name='test')
-            if res['status'] == 'stopped':
+            if res['status']['watcher'] == 'stopped':
                 stopped = True
                 break
-            self.assertEqual(res['status'], 'stopping')
+            self.assertEqual(res['status']['watcher'], 'stopping')
         self.assertTrue(stopped)
 
         yield self.stop_arbiter()
