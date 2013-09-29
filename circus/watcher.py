@@ -779,16 +779,16 @@ class Watcher(object):
 
     @util.debuglog
     def status(self):
-        if self.is_stopped():
-            watcher_status = 'stopped'
-        else:
-            watcher_status = 'active'
+        watcher_status = self._status
         process_list = []
         for pid, process in sorted(self.processes.iteritems(),
                 key=operator.itemgetter(0)):
             status = process.status_name
             info = process.info()
-            age = datetime.timedelta(seconds=info['age'])
+            if info == 'No such process (stopped?)':
+                age = 'N/A'
+            else:
+                age = datetime.timedelta(seconds=info['age'])
             datum = {
                 'pid': pid,
                 'status': status,
@@ -936,7 +936,10 @@ class Watcher(object):
         self._status = "starting"
 
         self._create_redirectors()
-        self.reap_processes()
+
+        if not self.upgradable:
+          self.reap_processes()
+
         yield self.spawn_processes()
 
         # If not self.processes, the before_spawn or after_spawn hooks have

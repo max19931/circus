@@ -209,9 +209,8 @@ class TestTrainer(TestCircus):
 
         resp = yield self._call("start", name=name)
         self.assertEqual(resp.get("status"), "ok")
-
         resp = yield self._call("status", name=name)
-        self.assertEqual(resp.get("status"), "active")
+        self.assertEqual(resp.get("status")['watcher'], "active")
         yield self.stop_arbiter()
 
     @tornado.testing.gen_test
@@ -224,7 +223,7 @@ class TestTrainer(TestCircus):
         self.assertEqual(resp.get("status"), "ok")
 
         resp = yield self._call("status", name=name)
-        self.assertEqual(resp.get("status"), "active")
+        self.assertEqual(resp.get("status")['watcher'], "active")
         yield self.stop_arbiter()
 
     @tornado.testing.gen_test
@@ -238,7 +237,7 @@ class TestTrainer(TestCircus):
         self.assertEqual(resp.get("status"), "ok")
 
         resp = yield self._call("status", name=name)
-        self.assertEqual(resp.get("status"), "active")
+        self.assertEqual(resp.get("status")['watcher'], "active")
 
         resp = yield self._call("options", name=name)
         options = resp.get('options', {})
@@ -401,12 +400,12 @@ class TestTrainer(TestCircus):
         yield self.start_arbiter(graceful_timeout=0)
         yield self._call("stop")
         resp = yield self._call("status", name="test")
-        self.assertEqual(resp.get("status"), "stopped")
+        self.assertEqual(resp.get("status")['watcher'], "stopped")
 
         yield self._call("start")
 
         resp = yield self._call("status", name="test")
-        self.assertEqual(resp.get("status"), 'active')
+        self.assertEqual(resp.get("status")['watcher'], "active")
         yield self.stop_arbiter()
 
     @tornado.testing.gen_test
@@ -423,11 +422,11 @@ class TestTrainer(TestCircus):
 
         yield self._call("stop", name=name)
         resp = yield self._call("status", name=name)
-        self.assertEqual(resp.get('status'), "stopped")
+        self.assertEqual(resp.get('status')['watcher'], "stopped")
 
         yield self._call("start", name=name)
         resp = yield self._call("status", name=name)
-        self.assertEqual(resp.get('status'), "active")
+        self.assertEqual(resp.get('status')['watcher'], "active")
         yield self.stop_arbiter()
 
     # XXX TODO
@@ -586,7 +585,7 @@ class TestArbiter(TestCircus):
         arbiter.add_watcher('foo', SLEEP % 5)
         try:
             yield arbiter.start()
-            self.assertEqual(arbiter.watchers[0].status(), 'active')
+            self.assertEqual(arbiter.watchers[0].status()['watcher'], 'active')
         finally:
             yield arbiter.stop()
 
@@ -598,7 +597,7 @@ class TestArbiter(TestCircus):
         arbiter.add_watcher('foo', SLEEP % 5, autostart=False)
         try:
             yield arbiter.start()
-            self.assertEqual(arbiter.watchers[0].status(), 'stopped')
+            self.assertEqual(arbiter.watchers[0].status()['watcher'], 'stopped')
         finally:
             yield arbiter.stop()
 
