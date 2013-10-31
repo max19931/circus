@@ -968,7 +968,7 @@ class Watcher(object):
         """Set a watcher option.
 
         This function set the watcher options. unknown keys are ignored.
-        This function return an action number:
+        This function returns an action number:
 
         - 0: trigger the process management
         - 1: trigger a graceful reload of the processes;

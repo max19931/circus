@@ -256,6 +256,8 @@ class Arbiter(object):
     @gen.coroutine
     def reload_from_config(self, config_file=None, inside_circusd=False):
         new_cfg = get_config(config_file if config_file else self.config_file)
+        can_hot_upgrade = True
+
         # if arbiter is changed, reload everything
         if self.get_arbiter_config(new_cfg) != self._cfg:
             yield self._restart(inside_circusd=inside_circusd)
@@ -278,14 +280,16 @@ class Arbiter(object):
         for n in maybechanged_sn:
             s = self.get_socket(n)
             if self.get_socket_config(new_cfg, n) != s._cfg:
+                # if we're changing any socket configs, require a full restart
+                can_hot_upgrade = False
                 changed_sn.add(n)
 
                 # just delete the socket and add it again
                 deleted_sn.add(n)
                 added_sn.add(n)
 
-                # Get the watchers whichs use these, so they could be
-                # deleted and added also
+                # Get the watchers which use these sockets so we can delete
+                # them and add them again
                 for w in self.iter_watchers():
                     if 'circus.sockets.%s' % n.lower() in w.cmd:
                         wn_with_changed_socket.add(w.name)
@@ -294,7 +298,8 @@ class Arbiter(object):
         for n in deleted_sn:
             s = self.get_socket(n)
             s.close()
-            # Get the watchers whichs use these, these should not be
+
+            # Get the watchers which use these, these should not be
             # active anymore
             for w in self.iter_watchers():
                 if 'circus.sockets.%s' % n.lower() in w.cmd:
@@ -311,7 +316,7 @@ class Arbiter(object):
         if added_sn or deleted_sn:
             # make sure all existing watchers get the new sockets in
             # their attributes and get the old removed
-            # XXX: is this necessary? self.sockets is an mutable
+            # XXX: is this necessary? self.sockets is a mutable
             # object
             for watcher in self.iter_watchers():
                 # XXX: What happens as initalize is called on a
@@ -336,6 +341,8 @@ class Arbiter(object):
             w = self.get_watcher(n)
             new_watcher_cfg = (self.get_watcher_config(new_cfg, n) or
                                self.get_plugin_config(new_cfg, n))
+
+            # XXX: why is this line repeated?
             if 'env' in new_watcher_cfg:
                 new_watcher_cfg['env'] = parse_env_dict(new_watcher_cfg['env'])
             old_watcher_cfg = w._cfg.copy()
@@ -355,17 +362,53 @@ class Arbiter(object):
 
             if diff == set(['numprocesses']):
                 # if nothing but the number of processes is
-                # changed, just changes this
+                # changed, just change it instead of restarting
                 w.set_numprocesses(int(new_watcher_cfg['numprocesses']))
                 changed = False
             else:
                 changed = len(diff) > 0
 
             if changed:
-                # Others things are changed. Just delete and add the watcher.
-                changed_wn.add(n)
-                deleted_wn.add(n)
-                added_wn.add(n)
+                flag = 'upgradable'
+                # check if we can do a hot upgrade
+                if flag in new_watcher_cfg and new_watcher_cfg[flag] and \
+                   flag in old_watcher_cfg and old_watcher_cfg[flag]:
+
+                    if not can_hot_upgrade:
+                        msg = "cant upgrade. restarting {} instead".format(n)
+                        logger.info(msg)
+
+                        changed_wn.add(n)
+                        deleted_wn.add(n)
+                        added_wn.add(n)
+                        continue
+
+                    # bring up a watcher using the new config
+                    w = Watcher.load_from_config(new_watcher_cfg)
+                    w.initialize(self.evpub_socket, self.sockets, self)
+
+                    # copy over the process table from the old watcher
+                    old_w = self.get_watcher(n)
+                    w.processes = old_w.processes
+
+                    # remove the old watcher from our tables, without
+                    # stopping it
+                    del self._watchers_names[old_w.name.lower()]
+                    self.watchers.remove(old_w)
+
+                    # start the the new watcher and add it to our tables
+                    self.start_watcher(w)
+                    self.watchers.append(w)
+                    self._watchers_names[w.name.lower()] = w
+
+                    # incr() the new watcher to start the new process
+                    w.incr(1)
+                else:
+                    logger.info("doing normal restart of".format(n))
+                    # Just destroy/recreate the watcher.
+                    changed_wn.add(n)
+                    deleted_wn.add(n)
+                    added_wn.add(n)
 
         # delete watchers
         for n in deleted_wn:
@@ -488,7 +531,7 @@ class Arbiter(object):
 
     @gen.coroutine
     def start_watcher(self, watcher):
-        """Aska a specific watcher to start and wait for the specified
+        """Ask a specific watcher to start and wait for the specified
         warmup delay."""
         if watcher.autostart:
             yield watcher._start()
