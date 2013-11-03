@@ -91,7 +91,8 @@ LOG_LEVELS = {
     "info": logging.INFO,
     "debug": logging.DEBUG}
 
-LOG_FMT = r"%(asctime)s %(name)s[%(process)d] [%(levelname)s] %(message)s"
+#LOG_FMT = r"%(asctime)s %(name)s[%(process)d] [%(levelname)s] %(message)s"
+LOG_FMT = r"[%(process)d] [%(levelname)s] %(message)s"
 LOG_DATE_FMT = r"%Y-%m-%d %H:%M:%S"
 LOG_DATE_SYSLOG_FMT = r"%b %d %H:%M:%S"
 _SYMBOLS = ('K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y')
