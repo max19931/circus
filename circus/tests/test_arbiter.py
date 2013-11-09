@@ -575,7 +575,7 @@ class TestArbiter(TestCircus):
         arbiter.add_watcher('foo', 'sleep 5', autostart=False)
         try:
             yield arbiter.start()
-            self.assertEqual(arbiter.watchers[0].status(), 'stopped')
+            self.assertEqual(arbiter.watchers[0].status()['watcher'], 'stopped')
         finally:
             yield arbiter.stop()
 

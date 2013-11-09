@@ -688,10 +688,7 @@ class Watcher(object):
 
     @util.debuglog
     def status(self):
-        if self.is_stopped():
-            watcher_status = 'stopped'
-        else:
-            watcher_status = 'active'
+        watcher_status = self._status
         process_list = []
         for pid, process in sorted(self.processes.iteritems(),
                 key=operator.itemgetter(0)):
