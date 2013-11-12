@@ -829,7 +829,10 @@ class Watcher(object):
         self._status = "starting"
 
         self._create_redirectors()
-        self.reap_processes()
+
+        if not self.upgradable:
+          self.reap_processes()
+
         yield self.spawn_processes()
 
         if not self.call_hook('after_start'):
