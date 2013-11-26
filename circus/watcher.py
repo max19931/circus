@@ -866,9 +866,6 @@ class Watcher(object):
 
         self._create_redirectors()
 
-        if not self.upgradable:
-          self.reap_processes()
-
         yield self.spawn_processes()
 
         # If not self.processes, the before_spawn or after_spawn hooks have
@@ -1068,3 +1065,6 @@ class Watcher(object):
 
     def is_active(self):
         return self._status == 'active'
+
+    def is_upgradable(self):
+      return self.upgradable
