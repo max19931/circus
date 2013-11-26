@@ -1,13 +1,25 @@
 from circus.commands.base import Command
 from circus.exc import ArgumentError
-
+from circus.util import TransformableFuture
 
 class Upgrade(Command):
     """\
-        Increment the number of processes in a watcher
+        Perform a hot-upgrade of the named watcher
         ==============================================
 
-        This comment increment the number of processes in a watcher by +1.
+        This command launches a 2nd process for an "upgradable" watcher.
+        Upgradable processes are expected to obtain two important variables:
+            1) the id of the file descriptor the 1st process is accept()'ing on
+            2) the PID of the zerorestart process (also managed by circus)
+
+        After the new process starts up and is ready to invoke accept() on the
+        file descriptor that was passed in, the new process should send a
+        SIGQUIT to the pid of the zerorestart process. zerorestart then invokes
+        the circus command "decr" to terminate the 1st process. This will send
+        a SIGTERM (by default) to the 1st process, which is expected to handle
+        that signal by exiting cleanly before watcher.graceful_timeout (defaults
+        to 30s). After graceful_timeout, circus sends a SIGKILL to forcibly quit
+        the 1st process.
 
         ZMQ Message
         -----------
@@ -15,16 +27,16 @@ class Upgrade(Command):
         ::
 
             {
-                "command": "incr",
+                "command": "upgrade",
                 "properties": {
                     "name": "<watchername>"
                 }
             }
 
-        The response return the number of processes in the 'numprocesses`
-        property::
+        The response contains the number of processes running for the watcher
+        after performing the "incr" operation::
 
-            { "status": "ok", "numprocesses": <n>, "time", "timestamp" }
+            { "status": "ok", "numprocesses": <n> }
 
         Command line
         ------------
@@ -50,15 +62,25 @@ class Upgrade(Command):
 
     def execute(self, arbiter, props):
         watcher = self._get_watcher(arbiter, props.get('name'))
-        if watcher.upgradable is False:
+
+        # watcher must be configured as upgradble
+        if not watcher.is_upgradable():
             return {"numprocesses": watcher.numprocesses, "upgradable": False}
         else:
-            if watcher.stopped is True:
+            # no need to upgrade a watcher thats already stopped
+            if watcher.is_stopped():
                 return {'stopped': True}
+
+            # cant do the upgrade file handle dance with > 1 process
             if watcher.numprocesses != 1:
                 return {"numprocesses": watcher.numprocesses,
                         "toomanyprocesses": True}
-            return {"numprocesses": watcher.incr(1)}
+
+            # start the new process. zerorestart.py will stop the old process
+            resp = TransformableFuture()
+            resp.set_upstream_future(watcher.incr(1))
+            resp.set_transform_function(lambda x: {"numprocesses": x})
+            return resp
 
     def console_msg(self, msg):
         if msg.get("status") == "ok":
@@ -67,8 +89,8 @@ class Upgrade(Command):
             elif msg.get('stopped') is True:
                 return 'Upgrade failed: watcher is stopped'
             elif msg.get("toomanyprocesses") is True:
-                return ('Upgrade failed: there are too many '
-                        'processes running for this watcher')
+                return ('Upgrade failed: can only upgrade when numprocesses=1, '
+                        'but numprocesses={}'.format(msg.get('numprocesses')))
             else:
                 return 'Upgrade successful'
         return self.console_error(msg)
