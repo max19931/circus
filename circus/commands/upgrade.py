@@ -53,7 +53,7 @@ class Upgrade(Command):
         if watcher.upgradable is False:
             return {"numprocesses": watcher.numprocesses, "upgradable": False}
         else:
-            if watcher.stopped is True:
+            if watcher.is_stopped():
                 return {'stopped': True}
             if watcher.numprocesses != 1:
                 return {"numprocesses": watcher.numprocesses,
