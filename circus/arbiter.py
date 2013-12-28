@@ -284,8 +284,8 @@ class Arbiter(object):
                 deleted_sn.add(n)
                 added_sn.add(n)
 
-                # Get the watchers whichs use these, so they could be
-                # deleted and added also
+                # Get the watchers which use these sockets so we can delete
+                # them and add them again
                 for w in self.iter_watchers():
                     if 'circus.sockets.%s' % n.lower() in w.cmd:
                         wn_with_changed_socket.add(w.name)
@@ -294,7 +294,8 @@ class Arbiter(object):
         for n in deleted_sn:
             s = self.get_socket(n)
             s.close()
-            # Get the watchers whichs use these, these should not be
+
+            # Get the watchers which use these, these should not be
             # active anymore
             for w in self.iter_watchers():
                 if 'circus.sockets.%s' % n.lower() in w.cmd:
@@ -311,7 +312,7 @@ class Arbiter(object):
         if added_sn or deleted_sn:
             # make sure all existing watchers get the new sockets in
             # their attributes and get the old removed
-            # XXX: is this necessary? self.sockets is an mutable
+            # XXX: is this necessary? self.sockets is a mutable
             # object
             for watcher in self.iter_watchers():
                 # XXX: What happens as initalize is called on a
@@ -353,7 +354,7 @@ class Arbiter(object):
 
             if diff == set(['numprocesses']):
                 # if nothing but the number of processes is
-                # changed, just changes this
+                # changed, just change it instead of restarting
                 w.set_numprocesses(int(new_watcher_cfg['numprocesses']))
                 changed = False
             else:
@@ -461,7 +462,7 @@ class Arbiter(object):
 
     @gen.coroutine
     def start_watcher(self, watcher):
-        """Aska a specific watcher to start and wait for the specified
+        """Ask a specific watcher to start and wait for the specified
         warmup delay."""
         if watcher.autostart:
             yield watcher._start()
