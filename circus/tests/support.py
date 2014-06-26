@@ -545,6 +545,7 @@ def async_run_plugin(klass, config, plugin_info_callback, duration=300,
         target=run_plugin,
         args=(klass, config, plugin_info_callback, duration,
               endpoint, pubsub_endpoint))
+
     circusctl_process.start()
 
     while queue.empty():

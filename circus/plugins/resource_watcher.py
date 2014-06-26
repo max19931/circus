@@ -92,7 +92,7 @@ class ResourceWatcher(BaseObserver):
                 mems.append(100 if sub_info['mem'] == 'N/A' else
                             float(sub_info['mem']))
                 mems_abs.append(0 if sub_info['mem_info1'] == 'N/A' else
-                                human2bytes(sub_info['mem_info1']))
+                                float(sub_info['mem_info1']))
 
         if cpus:
             data['max_cpu'] = max(cpus)

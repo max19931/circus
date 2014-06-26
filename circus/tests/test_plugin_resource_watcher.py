@@ -10,7 +10,6 @@ from circus.plugins.resource_watcher import ResourceWatcher
 MAX_CHUNKS = 10000
 CHUNK_SIZE = 30000
 
-
 class Leaky(Process):
     def run(self):
         self._write('START')
@@ -101,7 +100,6 @@ class TestResourceWatcher(TestCircus):
         statsd_increments = yield async_run_plugin(ResourceWatcher,
                                                    config,
                                                    get_statsd_increments, **kw)
-
         self._check_statsd(statsd_increments,
                            '_resource_watcher.test.under_memory')
         yield self.stop_arbiter()
@@ -118,7 +116,6 @@ class TestResourceWatcher(TestCircus):
                                                    config,
                                                    get_statsd_increments,
                                                    **kw)
-
         self._check_statsd(statsd_increments,
                            '_resource_watcher.test.under_memory')
         yield self.stop_arbiter()
