@@ -425,8 +425,8 @@ class Arbiter(object):
                     self.watchers.append(w)
                     self._watchers_names[w.name.lower()] = w
 
-                    # incr() the new watcher to start the new process
-                    w.incr(1)
+                    # incr the new watcher to start the new process
+                    w.set_numprocesses(w.numprocesses + 1)
                 else:
                     logger.info("doing normal restart of".format(n))
                     # Just destroy/recreate the watcher.

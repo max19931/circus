@@ -937,7 +937,6 @@ class Watcher(object):
 
         self._create_redirectors()
 
-        self.reap_processes()
         yield self.spawn_processes()
 
         # If not self.processes, the before_spawn or after_spawn hooks have
