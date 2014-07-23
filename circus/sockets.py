@@ -141,10 +141,6 @@ class CircusSocket(socket.socket):
 
     @classmethod
     def load_from_config(cls, config):
-        if config.get('family') == 'AF_INET':
-            raise NotImplementedError("AF_UNIX not supported on this"
-                                      "platform")
-
         params = {'name': config['name'],
                   'host': config.get('host', 'localhost'),
                   'port': int(config.get('port', '8080')),
