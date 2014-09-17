@@ -182,6 +182,7 @@ def get_config(config_file):
             sock = dict(cfg.items(section))
             sock['name'] = section.split("socket:")[-1].lower()
             sock['so_reuseport'] = dget(section, "so_reuseport", False, bool)
+            sock['ip_freebind'] = dget(section, "ip_freebind", False, bool)
             sock['replace'] = dget(section, "replace", False, bool)
             sockets.append(sock)
 

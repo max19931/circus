@@ -38,7 +38,7 @@ class CircusSocket(socket.socket):
     def __init__(self, name='', host='localhost', port=8080,
                  family=socket.AF_INET, type=socket.SOCK_STREAM,
                  proto=0, backlog=2048, path=None, umask=None, replace=False,
-                 interface=None, so_reuseport=False):
+                 interface=None, so_reuseport=False, ip_freebind=False):
         if path is not None:
             if not hasattr(socket, 'AF_UNIX'):
                 raise NotImplementedError("AF_UNIX not supported on this"
@@ -64,6 +64,16 @@ class CircusSocket(socket.socket):
         self.interface = interface
         self.backlog = backlog
         self.so_reuseport = so_reuseport
+        self.ip_freebind = ip_freebind
+
+        if self.ip_freebind:
+            try:
+                IP_FREEBIND = 15
+                self.setsockopt(socket.SOL_IP, IP_FREEBIND, 1)
+                logger.error('Setting IP_FREEBIND success')
+            except socket.error:
+                logger.error('Setting IP_FREEBIND failed')
+                pass
 
         if self.so_reuseport and hasattr(socket, 'SO_REUSEPORT'):
             try:
@@ -150,6 +160,7 @@ class CircusSocket(socket.socket):
                   'type': _TYPE[config.get('type', 'SOCK_STREAM').upper()],
                   'backlog': int(config.get('backlog', 2048)),
                   'so_reuseport': config.get('so_reuseport', False),
+                  'ip_freebind': config.get('ip_freebind', False),
                   'umask': int(config.get('umask', 8)),
                   'replace': config.get('replace')}
         proto_name = config.get('proto')
