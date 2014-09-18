@@ -186,14 +186,14 @@ def get_config(config_file):
             sock['replace'] = dget(section, "replace", False, bool)
             sockets.append(sock)
 
-        if section.startswith("plugin:"):
+        elif section.startswith("plugin:"):
             plugin = dict(cfg.items(section))
             plugin['name'] = section
             if 'priority' in plugin:
                 plugin['priority'] = int(plugin['priority'])
             plugins.append(plugin)
 
-        if section.startswith("watcher:"):
+        elif section.startswith("watcher:"):
             watcher = watcher_defaults()
             watcher['name'] = section.split("watcher:", 1)[1]
 
@@ -269,6 +269,8 @@ def get_config(config_file):
                 watcher['env'] = dict(local_env)
 
             watchers.append(watcher)
+        else:
+            logger.error("Bad section %r", section)
 
     # making sure we return consistent lists
     sort_by_field(watchers)
