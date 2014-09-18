@@ -356,6 +356,10 @@ socket:NAME - as many sections as you want
         If set to True and SO_REUSEPORT is available on target platform, circus
         will create and bind new SO_REUSEPORT socket(s) for every worker it starts
         which is a user of this socket(s).
+    **ip_freebind**
+        If set to True and IP_FREEBIND is available on target platform, circus
+        will create and bind new IP_FREEBIND socket(s) for every worker it starts
+        which is a user of this socket(s).
 
 
 Once a socket is created, the *${circus.sockets.NAME}* string can be used in the
