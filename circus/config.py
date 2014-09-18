@@ -1,3 +1,4 @@
+import ConfigParser
 import glob
 import os
 import signal
@@ -185,6 +186,18 @@ def get_config(config_file):
             sock['ip_freebind'] = dget(section, "ip_freebind", False, bool)
             sock['replace'] = dget(section, "replace", False, bool)
             sockets.append(sock)
+
+        elif section.startswith("socket_file:"):
+            # This is an evil hack. Instead of complex parsing the
+            # socket section just load an include file in simplest and
+            # fastest possible way.
+            fname = dget(section, "filename", False, str)
+            sockets_conf = ConfigParser.ConfigParser()
+            sockets_conf.read(fname)
+            for section in sockets_conf.sections():
+                sock = dict(sockets_conf.items(section))
+                sock['name'] = section.split("socket:", 1)[1].lower()
+                sockets.append(sock)
 
         elif section.startswith("plugin:"):
             plugin = dict(cfg.items(section))
