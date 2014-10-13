@@ -282,8 +282,6 @@ def get_config(config_file):
                 watcher['env'] = dict(local_env)
 
             watchers.append(watcher)
-        else:
-            logger.error("Bad section %r", section)
 
     # making sure we return consistent lists
     sort_by_field(watchers)
