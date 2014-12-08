@@ -402,6 +402,8 @@ class Arbiter(object):
                         added_wn.add(n)
                         continue
 
+                    logger.info("doing upgrade of".format(w.name.lower()))
+
                     # bring up a watcher using the new config
                     w = Watcher.load_from_config(new_watcher_cfg)
                     w.initialize(self.evpub_socket, self.sockets, self)
@@ -423,7 +425,7 @@ class Arbiter(object):
                     # incr the new watcher to start the new process
                     w.set_numprocesses(w.numprocesses + 1)
                 else:
-                    logger.info("doing normal restart of".format(n))
+                    logger.info("doing normal restart of".format(w.name.lower()))
                     # Just destroy/recreate the watcher.
                     changed_wn.add(n)
                     deleted_wn.add(n)
